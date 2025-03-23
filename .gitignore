@@ -1,0 +1,27 @@
+# Ignore compiled object files
+obj/
+*.o
+
+# Ignore generated binaries
+kernel.bin
+unicore.iso
+
+# Ignore ISO and boot-related artifacts
+iso/
+boot/
+
+# Ignore build system files
+Makefile~
+linker.ld~
+
+# Ignore temporary files and editor-specific files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+*.dSYM/
+.vscode/
+.idea/
+.DS_Store
+
