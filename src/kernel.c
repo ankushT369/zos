@@ -8,7 +8,7 @@ void kernel_main()
 {
     vga_initialize();
 
-    const char *output_scr_buff = "fuck you kernel";
+    const char *output_scr_buff = "H";
 
     vga_print(output_scr_buff, VGA_COLOR_RED, VGA_COLOR_WHITE);
 }

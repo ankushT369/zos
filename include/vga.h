@@ -35,4 +35,5 @@ static inline color_t vga_combine_color(vga_color bgc, vga_color txtc)
 {
     return (bgc << 4) | txtc;
 }
+
 #endif // __VGA_H__
