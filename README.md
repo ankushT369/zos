@@ -1,2 +1,2 @@
 # zos
-Microkernel experiment
+Monolith kernel experiment
