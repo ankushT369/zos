@@ -1,63 +1,45 @@
+// include/gdt.h
 #ifndef __GDT_H__
 #define __GDT_H__
 
 #include <stdint.h>
 
-#define SEG_DATA_RD             0x00 /* Read-Only */
-#define SEG_DATA_RDA            0x01 /* Read-Only, accessed */
-#define SEG_DATA_RDWR           0x02 /* Read/Write */
-#define SEG_DATA_RDWRA          0x03 /* Read/Write, accessed */
-#define SEG_DATA_RDEXPD         0x04 /* Read-Only, expand-down */
-#define SEG_DATA_RDEXPDA        0x05 /* Read-Only, expand-down, accessed */
-#define SEG_DATA_RDWREXPD       0x06 /* Read/Write, expand-down */
-#define SEG_DATA_RDWREXPDA      0x07 /* Read/Write, expand-down, accessed */
-#define SEG_CODE_EX             0x08 /* Execute-Only */
-#define SEG_CODE_EXA            0x09 /* Execute-Only, accessed */
-#define SEG_CODE_EXRD           0x0A /* Execute/Read */
-#define SEG_CODE_EXRDA          0x0B /* Execute/Read, accessed */
-#define SEG_CODE_EXC            0x0C /* Execute-Only, conforming */
-#define SEG_CODE_EXCA           0x0D /* Execute-Only, conforming, accessed */
-#define SEG_CODE_EXRDC          0x0E /* Execute/Read, conforming */
-#define SEG_CODE_EXRDCA         0x0F /* Execute/Read, conforming, accessed */
+// GDT Entry Definition
+struct gdt_entry {
+        uint16_t limit_low;     // Lower 16 bits of limit
+        uint16_t base_low;      // Lower 16 bits of base
+        uint8_t  base_mid;      // Next 8 bits of base
+        uint8_t  access;        // Access flags
+        uint8_t  granularity;   // Limit high 4 bits + flags
+        uint8_t  base_high;     // Last 8 bits of base
+} __attribute__((packed));
 
-#define SEG_RING0               (0 << 5)  /* Ring 0 - Kernel */
-#define SEG_RING1               (1 << 5)  /* Ring 1 */
-#define SEG_RING2               (2 << 5)  /* Ring 2 */
-#define SEG_RING3               (3 << 5)  /* Ring 3 - User */
+// GDT Pointer Structure
+struct gdt_ptr {
+        uint16_t size;
+        uint32_t offset;
+} __attribute__((packed));
 
-#define SEG_PRESENT             (1 << 7)
-#define SEG_NOT_PRESENT         (0 << 7)
+// Segment Selector Constants
+#define KERNEL_CS 0x08
+#define KERNEL_DS 0x10
+#define USER_CS   0x18
+#define USER_DS   0x20
 
-#define SEG_CODE_DATA           (1 << 4)
-#define SEG_SYS                 (0 << 4)
+// Access Byte Flags
+#define GDT_ACCESS_PRESENT     (1 << 7)
+#define GDT_ACCESS_RING0       (0 << 5)
+#define GDT_ACCESS_RING3       (3 << 5)
+#define GDT_ACCESS_CODE_SEG    (1 << 3)
+#define GDT_ACCESS_DATA_SEG    (0 << 3)
+#define GDT_ACCESS_READ_WRITE  (1 << 1)
 
-#define KERN_CODE_SEG           SEG_PRESENT | SEG_RING0 | SEG_CODE_DATA | SEG_CODE_EXRD
-#define KERN_DATA_SEG           SEG_PRESENT | SEG_RING0 | SEG_CODE_DATA | SEG_DATA_RDWR
-#define USER_CODE_SEG           SEG_PRESENT | SEG_RING3 | SEG_CODE_DATA | SEG_CODE_EXRD
-#define USER_DATA_SEG           SEG_PRESENT | SEG_RING3 | SEG_CODE_DATA | SEG_DATA_RDWR
-
-struct gdt_es
-{
-        unsigned short          limit;
-        unsigned short          base_low;
-        unsigned char           base_mid;
-        unsigned char           access_byte;
-        unsigned char           flags;
-        unsigned char           base_high;
-}__attribute__((packed));
-
-
-struct gdt_es_ptr
-{
-        unsigned short          size;
-        uint32_t            offset;
-}__attribute__((packed));
-
-
-typedef struct gdt_es gdt_es;
-typedef struct gdt_es_ptr gdt_es_ptr;
+// Granularity Flags
+#define GDT_GRAN_4KB       (1 << 7)
+#define GDT_GRAN_32BIT     (1 << 6)
+#define GDT_GRAN_LONG_MODE (1 << 5)
 
 void init_gdt();
-void set_gdt(uint32_t, uint32_t, uint32_t, unsigned char, unsigned char);
+extern void gdt_flush(uint32_t);
 
 #endif // __GDT_H__

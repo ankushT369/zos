@@ -1,38 +1,50 @@
+// src/gdt.c
 #include "../include/gdt.h"
 
-extern void gdt_flush(uint32_t);
+// Our GDT and GDT pointer
+struct gdt_entry gdt[5];
+struct gdt_ptr gp;
 
-gdt_es gdt_ents[5];
-gdt_es_ptr gdt_ptr;
+void set_gdt_entry(int index, uint32_t base, uint32_t limit, 
+                   uint8_t access, uint8_t gran) {
+    gdt[index].base_low = (base & 0xFFFF);
+    gdt[index].base_mid = (base >> 16) & 0xFF;
+    gdt[index].base_high = (base >> 24) & 0xFF;
 
-void init_gdt()
-{
-        gdt_ptr.size = (sizeof(gdt_es) * 5) - 1;
-        gdt_ptr.offset = &gdt_ents;
+    gdt[index].limit_low = (limit & 0xFFFF);
+    gdt[index].granularity = ((limit >> 16) & 0x0F) | (gran & 0xF0);
 
-        set_gdt(0, 0, 0, 0, 0);
-        set_gdt(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);
-        set_gdt(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
-        set_gdt(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);
-        set_gdt(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
-
-        gdt_flush(&gdt_ptr);
+    gdt[index].access = access;
 }
 
-/*
-void set_gdt(unsigned long int index, unsigned long int base, unsigned long int limit, 
-        unsigned char access, unsigned char gran)
-        */
-void set_gdt(uint32_t index, uint32_t base, uint32_t limit, 
-        unsigned char access, unsigned char gran)
-{
-        gdt_ents[index].base_low = (base & 0xFFFF);
-        gdt_ents[index].base_mid = (base >> 16) & 0xFF;
-        gdt_ents[index].base_high = (base >> 24) & 0xFF;
+void init_gdt() {
+    // Null descriptor
+    set_gdt_entry(0, 0, 0, 0, 0);
+    
+    // Kernel Code Segment
+    set_gdt_entry(1, 0, 0xFFFFFFFF,
+                  GDT_ACCESS_PRESENT | GDT_ACCESS_RING0 | GDT_ACCESS_CODE_SEG | GDT_ACCESS_READ_WRITE,
+                  GDT_GRAN_4KB | GDT_GRAN_32BIT);
+    
+    // Kernel Data Segment
+    set_gdt_entry(2, 0, 0xFFFFFFFF,
+                  GDT_ACCESS_PRESENT | GDT_ACCESS_RING0 | GDT_ACCESS_DATA_SEG | GDT_ACCESS_READ_WRITE,
+                  GDT_GRAN_4KB | GDT_GRAN_32BIT);
+    
+    // User Code Segment
+    set_gdt_entry(3, 0, 0xFFFFFFFF,
+                  GDT_ACCESS_PRESENT | GDT_ACCESS_RING3 | GDT_ACCESS_CODE_SEG | GDT_ACCESS_READ_WRITE,
+                  GDT_GRAN_4KB | GDT_GRAN_32BIT);
+    
+    // User Data Segment
+    set_gdt_entry(4, 0, 0xFFFFFFFF,
+                  GDT_ACCESS_PRESENT | GDT_ACCESS_RING3 | GDT_ACCESS_DATA_SEG | GDT_ACCESS_READ_WRITE,
+                  GDT_GRAN_4KB | GDT_GRAN_32BIT);
 
-        gdt_ents[index].limit = (limit & 0xFFFF);
-        gdt_ents[index].flags = (limit >> 16) & 0x0F;
-        gdt_ents[index].flags |= (gran & 0x0F);
+    // Set up GDT pointer
+    gp.size = sizeof(gdt) - 1;
+    gp.offset = (uint32_t)&gdt;
 
-        gdt_ents[index].access_byte = access;
+    // Load new GDT
+    gdt_flush((uint32_t)&gp);
 }

@@ -4,7 +4,7 @@ obj/
 
 # Ignore generated binaries
 kernel.bin
-unicore.iso
+zos.iso
 
 # Ignore ISO and boot-related artifacts
 iso/

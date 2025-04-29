@@ -7,6 +7,7 @@ LD = i686-elf-ld
 CFLAGS = -m32 -ffreestanding -nostdlib -Wall -Wextra -Iinclude
 ASMFLAGS = -f elf32
 LDFLAGS = -m elf_i386 -T linker.ld -nostdlib
+# Add these to your existing Makefile
 
 # Directories
 SRC_DIR = src
@@ -21,7 +22,7 @@ OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_FILES)) \
 
 # Output files
 KERNEL_BIN = kernel.bin
-ISO = unicore.iso
+ISO = zos.iso
 
 # Build the kernel
 all: $(KERNEL_BIN)

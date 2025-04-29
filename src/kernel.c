@@ -5,10 +5,12 @@
 #error "Cross-Compiler not found"
 #endif
 
-void kernel_main()
-{
+void kernel_main() {
     vga_initialize();
-    const char *output_scr_buff = "Gdt loaded successfully";
-    vga_print(output_scr_buff, VGA_COLOR_RED, VGA_COLOR_WHITE);
-    init_gdt();
+    //init_gdt();  // Initialize GDT first
+    
+    const char *msg = "New GDT loaded successfully!";
+    vga_print(msg, VGA_COLOR_GREEN, VGA_COLOR_BLACK);
+    
+    // Rest of your kernel code...
 }
